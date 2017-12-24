@@ -77,7 +77,9 @@ def print_and_write_to_logfile(log_text):
 def get_total_bittrex_bitcoin(bittrex):
     result = bittrex.get_balance('BTC')
     if result['success']:
-        return float(bittrex.get_balance('BTC')['result']['Available'])
+        total_bitcoin = float(bittrex.get_balance('BTC')['result']['Available'])
+        total_bitcoin = total_bitcoin - .0025 * total_bitcoin
+        return total_bitcoin
     else:
         print_and_write_to_logfile("Bitcoin Balance Request Unsuccessful")
         return 0
@@ -121,10 +123,10 @@ def buy_from_bittrex(bittrex, market):
         amount_to_buy, rate = get_bittrex_rate_amount(bittrex, market, total_bitcoin)
         buy_order = bittrex.buy_limit(market, amount_to_buy, rate)
 
-        time.sleep(10)
+        #time.sleep(10)
 
         get_open_orders = bittrex.get_open_orders(market)
-        if get_open_order['success']:
+        if get_open_orders['success']:
             my_open_orders = get_open_orders['result']
 
         if len(my_open_orders) == 0:
