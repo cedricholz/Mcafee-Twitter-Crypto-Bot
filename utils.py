@@ -7,12 +7,12 @@ import re
 import twitter
 import datetime
 import time
+import math
 
 
 def query_url(url_addr):
     with urllib.request.urlopen(url_addr) as url:
         return json.loads(url.read().decode())
-
 
 def bittrex_symbols_names_to_symbols():
     bittrex_coins = get_bittrex_market_names()
@@ -21,7 +21,6 @@ def bittrex_symbols_names_to_symbols():
         buyable_coins[symbol.lower()] = 'BTC-' + symbol
         buyable_coins[bittrex_coins[symbol]['full_name'].lower()] = 'BTC-' + symbol
     return buyable_coins
-
 
 def binance_symbols_names_to_symbols(binance):
     buyable_coins = {}
@@ -36,7 +35,6 @@ def binance_symbols_names_to_symbols(binance):
             buyable_coins[symbol.lower()] = market
             buyable_coins[full_name] = market
     return buyable_coins
-
 
 def bitcoin_to_usd(bitcoin_amount):
     b = BtcConverter()
@@ -59,7 +57,6 @@ def get_binance_account():
 
     return Client(secrets['key'], secrets['secret'])
 
-
 def get_twitter_account():
     with open("twitter_secrets.json") as secrets_file:
         secrets = json.load(secrets_file)
@@ -70,19 +67,9 @@ def get_twitter_account():
                        secrets['access_token_key'],
                        secrets['access_token_secret'])
 
-
-def get_updated_coinmarketcap_coins():
-    return query_url("https://api.coinmarketcap.com/v1/ticker/?limit=2000")
-
-
 def get_date_time():
     now = datetime.now()
     return "%s:%s:%s %s/%s/%s" % (now.hour, now.minute, now.second, now.month, now.day, now.year)
-
-
-def time_stamp_to_date(timstamp):
-    return datetime.fromtimestamp(int(timstamp)).strftime('%H:%M:%S %m/%d/%Y')
-
 
 def print_and_write_to_logfile(log_text):
     if log_text is not None:
@@ -122,21 +109,21 @@ def get_bittrex_market_names():
     return coins
 
 
-def get_bitrex_rate_amount(bittrex, market, total_bitcoin):
+def get_bittrex_rate_amount(bittrex, market, total_bitcoin):
     sell_book = bittrex.get_orderbook(market, 'sell', depth=20)['result']
     for order in sell_book:
         order_rate = float(order['Rate'])
         order_quantity = float(order['Quantity'])
-        amount_to_buy = total_bitcoin * order_rate
+        amount_to_buy = total_bitcoin / order_rate
         if amount_to_buy < order_quantity:
-            return amount_to_buy, order_rate
+            return math.floor(amount_to_buy), order_rate
 
 
 def buy_from_bittrex(bittrex, market):
     total_bitcoin = get_total_bittrex_bitcoin(bittrex)
 
     while True:
-        amount_to_buy, rate = get_bitrex_rate_amount(bittrex, market, total_bitcoin)
+        amount_to_buy, rate = get_bittrex_rate_amount(bittrex, market, total_bitcoin)
         buy_order = api.buy_limit(market, amount_to_buy, rate)
 
         time.sleep(10)
@@ -150,5 +137,30 @@ def buy_from_bittrex(bittrex, market):
         else:
             for order in my_open_orders:
                 bittrex.cancel(order['OrderUuid'])
+    print_and_write_to_logfile("Successfully Bought" + market + "from Bittrex at " + get_date_time())
+
+def get_binance_amount(binance, market, total_bitcoin):
+    trades = binance.get_recent_trades(symbol=market)
+    for trade in trades:
+        order_rate = float(trade['price'])
+        order_quantity = float(trade['qty'])
+        amount_to_buy = total_bitcoin/order_rate
+        if amount_to_buy < order_quantity:
+            return math.floor(amount_to_buy)
+
+def get_total_binance_bitcoin(binance):
+    accounts = binance.get_account()['balances']
+    for coin in accounts:
+        if coin['asset'] == 'BTC':
+            return float(coin['free'])
+    return 0
 
 def buy_from_binance(binance, market):
+    total_bitcoin = get_total_binance_bitcoin(binance)
+
+    amount = get_binance_amount(binance, market, total_bitcoin)
+
+    order = binance.order_market_buy(
+        symbol=market,
+        quantity=amount)
+    print_and_write_to_logfile("Successfully Bought " + market + " from Binance at " + get_date_time())

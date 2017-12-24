@@ -1,5 +1,7 @@
 import utils
 import time
+import math
+
 
 binance = utils.get_binance_account()
 
@@ -11,9 +13,7 @@ bittrex_coins = utils.bittrex_symbols_names_to_symbols()
 twitter = utils.get_twitter_account()
 twitter_user = 'officialmcafee'
 
-#seen_coins = ['dgb', 'digibyte', 'burst']
-
-seen_coins = []
+seen_coins = ['dgb', 'digibyte', 'burst']
 
 def check_statuses(twitter, twitter_user):
     statuses = twitter.GetUserTimeline(screen_name=twitter_user)
