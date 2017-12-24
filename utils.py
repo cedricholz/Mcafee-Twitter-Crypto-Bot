@@ -119,7 +119,7 @@ def buy_from_bittrex(bittrex, market):
 
     while True:
         amount_to_buy, rate = get_bittrex_rate_amount(bittrex, market, total_bitcoin)
-        buy_order = api.buy_limit(market, amount_to_buy, rate)
+        buy_order = bittrex.buy_limit(market, amount_to_buy, rate)
 
         time.sleep(10)
 
