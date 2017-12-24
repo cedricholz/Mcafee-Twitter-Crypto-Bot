@@ -36,11 +36,6 @@ def binance_symbols_names_to_symbols(binance):
             buyable_coins[full_name] = market
     return buyable_coins
 
-def bitcoin_to_usd(bitcoin_amount):
-    b = BtcConverter()
-    latest_price = b.get_latest_price('USD')
-    return latest_price * bitcoin_amount
-
 
 def get_bittrex_account():
     with open("bittrex_secrets.json") as secrets_file:

@@ -23,12 +23,10 @@ def check_statuses(twitter, twitter_user):
         for word in tweet.split(" "):
             lowered_word = word.lower()
             if lowered_word in binance_coins and lowered_word not in seen_coins:
-                # utils.buy_from_binance(binance, binance_coins[lowered_word])
-                print(lowered_word)
+                utils.buy_from_binance(binance, binance_coins[lowered_word])
                 return True
             elif lowered_word in bittrex_coins and lowered_word not in seen_coins:
-                # utils.buy_from_bittrex(bittrex, bittrex_coins[lowered_word])
-                print(lowered_word)
+                utils.buy_from_bittrex(bittrex, bittrex_coins[lowered_word])
                 return True
     return False
 
