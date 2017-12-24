@@ -149,7 +149,9 @@ def get_total_binance_bitcoin(binance):
     accounts = binance.get_account()['balances']
     for coin in accounts:
         if coin['asset'] == 'BTC':
-            return float(coin['free'])
+            total_bitcoin = float(coin['free'])
+            total_bitcoin = total_bitcoin - .001*total_bitcoin
+            return total_bitcoin
     return 0
 
 def buy_from_binance(binance, market):
