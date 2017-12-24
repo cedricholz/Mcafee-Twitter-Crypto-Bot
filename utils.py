@@ -5,7 +5,7 @@ import urllib
 import json
 import re
 import twitter
-import datetime
+from datetime import datetime
 import time
 import math
 
@@ -61,7 +61,6 @@ def get_twitter_account():
                        secrets['consumer_secret'],
                        secrets['access_token_key'],
                        secrets['access_token_secret'])
-
 def get_date_time():
     now = datetime.now()
     return "%s:%s:%s %s/%s/%s" % (now.hour, now.minute, now.second, now.month, now.day, now.year)
