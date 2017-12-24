@@ -1,0 +1,11 @@
+# Created by .ignore support plugin (hsz.mobi)
+.gitignore
+.idea/Twitter-Signal-Cryptocurrency-Buyer.iml
+.idea/misc.xml
+.idea/modules.xml
+.idea/workspace.xml
+bittrex_secrets.json
+binance_secrets.json
+twitter_secrets.json
+logs.txt
+__pycache__/
