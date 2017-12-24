@@ -31,12 +31,12 @@ Create a file in the main folder called binance_secrets.json and fill it with yo
 Create a twitter Application here https://apps.twitter.com/app/new and get your consumer_key, consumer_secret, access_token_key, and access_token_secret.
 
 Create a file in the main folder called twitter_secrets.json and fill it with your information in the format below.
-
+```
 {
   "consumer_key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
   "consumer_secret": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
   "access_token_key": "xxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
   "access_token_secret": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 }
-
+```
 Then just make sure you have Bitcoin in both of your accounts, turn it on at night and each morning add the coin of the day ticker and full name to the seen_coins list.
