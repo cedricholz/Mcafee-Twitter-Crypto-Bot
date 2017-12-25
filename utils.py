@@ -14,6 +14,7 @@ def query_url(url_addr):
     with urllib.request.urlopen(url_addr) as url:
         return json.loads(url.read().decode())
 
+
 def bittrex_symbols_names_to_symbols():
     bittrex_coins = get_bittrex_market_names()
     buyable_coins = {}
@@ -21,6 +22,7 @@ def bittrex_symbols_names_to_symbols():
         buyable_coins[symbol.lower()] = 'BTC-' + symbol
         buyable_coins[bittrex_coins[symbol]['full_name'].lower()] = 'BTC-' + symbol
     return buyable_coins
+
 
 def binance_symbols_names_to_symbols(binance):
     buyable_coins = {}
@@ -52,6 +54,7 @@ def get_binance_account():
 
     return Client(secrets['key'], secrets['secret'])
 
+
 def get_twitter_account():
     with open("twitter_secrets.json") as secrets_file:
         secrets = json.load(secrets_file)
@@ -61,9 +64,12 @@ def get_twitter_account():
                        secrets['consumer_secret'],
                        secrets['access_token_key'],
                        secrets['access_token_secret'])
+
+
 def get_date_time():
     now = datetime.now()
     return "%s:%s:%s %s/%s/%s" % (now.hour, now.minute, now.second, now.month, now.day, now.year)
+
 
 def print_and_write_to_logfile(log_text):
     if log_text is not None:
@@ -107,7 +113,12 @@ def get_bittrex_market_names():
 
 def get_bittrex_rate_amount(bittrex, market, total_bitcoin):
     sell_book = bittrex.get_orderbook(market, 'sell', depth=20)['result']
-    for order in sell_book:
+    sell_book_list = [order for order in sell_book]
+
+    sell_order_to_start_with = 0
+
+    for i in range(sell_order_to_start_with, len(sell_book_list)):
+        order = sell_book_list[i]
         order_rate = float(order['Rate'])
         order_quantity = float(order['Quantity'])
         amount_to_buy = total_bitcoin / order_rate
@@ -120,38 +131,62 @@ def buy_from_bittrex(bittrex, market):
 
     while True:
         amount_to_buy, rate = get_bittrex_rate_amount(bittrex, market, total_bitcoin)
+        print_and_write_to_logfile("Buying " + str(amount_to_buy) + " at " + str(rate))
+
+        # Attempt to make buy order
         buy_order = bittrex.buy_limit(market, amount_to_buy, rate)
 
-        #time.sleep(10)
 
+        while not buy_order['success']:
+            print_and_write_to_logfile("Buy Unsucessful")
+            time.sleep(4)
+            buy_order = bittrex.buy_limit(market, amount_to_buy, rate)
+
+        # Wait for order to go through
+        time.sleep(10)
+
+        # Attempt to get list of open orders
         get_open_orders = bittrex.get_open_orders(market)
-        if get_open_orders['success']:
-            my_open_orders = get_open_orders['result']
+        while not get_open_orders['success']:
+            print_and_write_to_logfile("Get Open Orders Unsuccessful")
+            time.sleep(4)
+            get_open_orders = bittrex.get_open_orders(market)
+
+        my_open_orders = get_open_orders['result']
 
         if len(my_open_orders) == 0:
+            print_and_write_to_logfile("Successfully Bought " + market + " from Bittrex at " + get_date_time())
             return 'Success'
         else:
             for order in my_open_orders:
-                bittrex.cancel(order['OrderUuid'])
-    print_and_write_to_logfile("Successfully Bought" + market + "from Bittrex at " + get_date_time())
+                print_and_write_to_logfile("Canceling " + order['OrderUuid'])
+                canceled = bittrex.cancel(order['OrderUuid'])
+                while not canceled['success']:
+                    print_and_write_to_logfile("Cancel unsuccessful")
+                    time.sleep(4)
+                    canceled = bittrex.cancel(order['OrderUuid'])
+            # Wait for sell to go through
+            time.sleep(10)
 
 def get_binance_amount(binance, market, total_bitcoin):
     trades = binance.get_recent_trades(symbol=market)
     for trade in trades:
         order_rate = float(trade['price'])
         order_quantity = float(trade['qty'])
-        amount_to_buy = total_bitcoin/order_rate
+        amount_to_buy = total_bitcoin / order_rate
         if amount_to_buy < order_quantity:
             return math.floor(amount_to_buy)
+
 
 def get_total_binance_bitcoin(binance):
     accounts = binance.get_account()['balances']
     for coin in accounts:
         if coin['asset'] == 'BTC':
             total_bitcoin = float(coin['free'])
-            total_bitcoin = total_bitcoin - .001*total_bitcoin
+            total_bitcoin = total_bitcoin - .001 * total_bitcoin
             return total_bitcoin
     return 0
+
 
 def buy_from_binance(binance, market):
     total_bitcoin = get_total_binance_bitcoin(binance)
