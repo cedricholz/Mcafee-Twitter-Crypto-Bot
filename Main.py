@@ -25,6 +25,7 @@ def check_statuses(twitter, twitter_user, seen_coins):
     for tweet in coin_of_the_day_tweets:
         for word in tweet.split(" "):
             lowered_word = word.lower()
+
             if lowered_word in binance_coins and lowered_word not in seen_coins:
                 utils.print_and_write_to_logfile("Binance: Buying " + lowered_word)
 
@@ -53,11 +54,25 @@ def check_statuses(twitter, twitter_user, seen_coins):
 
                 finished = True
             if finished:
-                return True
-    return False
+                return True, symbol
+    return False, ''
+
+def wait_for_tweet_and_buy():
+    bought = False
+    while not bought:
+        bought, symbol = check_statuses(twitter, twitter_user, seen_coins)
+        time.sleep(4)
+    return symbol
+
+def sell_at_peak(symbol):
+    return
 
 
-bought = False
-while not bought:
-    bought = check_statuses(twitter, twitter_user, seen_coins)
-    time.sleep(4)
+
+bought_symbol = wait_for_tweet_and_buy()
+
+sell_at_peak(bought_symbol)
+
+
+
+

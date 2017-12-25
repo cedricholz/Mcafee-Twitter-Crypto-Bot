@@ -1,1 +1,1 @@
-["burst", "dgb", "digibyte", "reddcoin", "RDD", "humaniq", "hmq"]
+["burst", "dgb", "digibyte", "reddcoin", "RDD", "humaniq", "hmq", "litecoin", "ltc", "litecoin", "ltc"]
