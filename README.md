@@ -39,4 +39,5 @@ Create a file in the main folder called twitter_secrets.json and fill it with yo
   "access_token_secret": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 }
 ```
-Then just make sure you have Bitcoin in both of your accounts, turn it on at night and each morning add the coin of the day ticker and full name to the seen_coins list.
+Then just make sure you have Bitcoin in both of your accounts, turn it on at night.
+Make sure the seen_coins.txt list is updated before you start or else it might buy a coin that's already been pumped.
