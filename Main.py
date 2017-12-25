@@ -65,6 +65,10 @@ def wait_for_tweet_and_buy():
     return symbol
 
 def sell_at_peak(symbol):
+    if symbol in binance_coins:
+        return
+    if symbol in bittrex_coins:
+        return
     return
 
 
