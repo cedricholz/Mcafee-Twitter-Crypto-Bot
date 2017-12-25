@@ -14,17 +14,41 @@ def query_url(url_addr):
     with urllib.request.urlopen(url_addr) as url:
         return json.loads(url.read().decode())
 
+def get_seen_coins():
+    with open('seen_coins.txt', 'r') as f:
+        seen_coins = json.loads(f.read())
+    return seen_coins
 
-def bittrex_symbols_names_to_symbols():
+def add_to_seen_coins(binance_coins, bittrex_coins, symbol):
+
+
+    seen_coins = get_seen_coins()
+
+    full_name = ''
+    if symbol in binance_coins:
+        full_name = binance_coins[symbol][1]
+    elif symbol in bittrex_coins:
+        full_name = bittrex_coins[symbol][1]
+
+
+    seen_coins.append(full_name)
+    seen_coins.append(symbol)
+
+    with open('seen_coins.txt', 'w') as f:
+        f.write(json.dumps(seen_coins))
+
+
+def bittrex_symbols_and_names_to_markets_and_names():
     bittrex_coins = get_bittrex_market_names()
     buyable_coins = {}
     for symbol in bittrex_coins:
-        buyable_coins[symbol.lower()] = 'BTC-' + symbol
-        buyable_coins[bittrex_coins[symbol]['full_name'].lower()] = 'BTC-' + symbol
+        full_name = bittrex_coins[symbol]['full_name'].lower()
+        buyable_coins[symbol.lower()] = ('BTC-' + symbol, full_name)
+        buyable_coins[full_name] = ('BTC-' + symbol, full_name)
     return buyable_coins
 
 
-def binance_symbols_names_to_symbols(binance):
+def binance_symbols_and_names_to_markets_and_names(binance):
     buyable_coins = {}
     products = binance.get_products()
     for coin in products['data']:
@@ -34,8 +58,8 @@ def binance_symbols_names_to_symbols(binance):
             symbol = coin['baseAsset']
             full_name = coin['baseAssetName'].lower()
 
-            buyable_coins[symbol.lower()] = market
-            buyable_coins[full_name] = market
+            buyable_coins[symbol.lower()] = (market, full_name)
+            buyable_coins[full_name] = (market, full_name)
     return buyable_coins
 
 
@@ -197,3 +221,4 @@ def buy_from_binance(binance, market):
         symbol=market,
         quantity=amount)
     print_and_write_to_logfile("Successfully Bought " + market + " from Binance at " + get_date_time())
+

@@ -7,15 +7,17 @@ binance = utils.get_binance_account()
 
 bittrex = utils.get_bittrex_account()
 
-binance_coins = utils.binance_symbols_names_to_symbols(binance)
-bittrex_coins = utils.bittrex_symbols_names_to_symbols()
+binance_coins = utils.binance_symbols_and_names_to_markets_and_names(binance)
+bittrex_coins = utils.bittrex_symbols_and_names_to_markets_and_names()
 
 twitter = utils.get_twitter_account()
 twitter_user = 'officialmcafee'
 
-seen_coins = ['burst', 'dgb', 'digibyte', 'reddcoin', 'RDD']
 
-def check_statuses(twitter, twitter_user):
+seen_coins = utils.get_seen_coins()
+
+
+def check_statuses(twitter, twitter_user, seen_coins):
     statuses = twitter.GetUserTimeline(screen_name=twitter_user)
     coin_of_the_day_tweets = [s.text for s in statuses if "coin of the day" in s.text.lower()]
 
@@ -25,11 +27,30 @@ def check_statuses(twitter, twitter_user):
             lowered_word = word.lower()
             if lowered_word in binance_coins and lowered_word not in seen_coins:
                 utils.print_and_write_to_logfile("Binance: Buying " + lowered_word)
-                utils.buy_from_binance(binance, binance_coins[lowered_word])
+
+                market = binance_coins[lowered_word][0]
+
+                utils.buy_from_binance(binance, market)
+
+                symbol = market.split('BTC')[0].lower()
+                utils.add_to_seen_coins(binance_coins, bittrex_coins, symbol)
+
+
                 finished = True
             if lowered_word in bittrex_coins and lowered_word not in seen_coins:
                 utils.print_and_write_to_logfile("Bittrex: Buying " + lowered_word)
-                utils.buy_from_bittrex(bittrex, bittrex_coins[lowered_word])
+
+                market = bittrex_coins[lowered_word][0]
+
+                utils.buy_from_bittrex(bittrex, market)
+
+                symbol = market.split('-')[1].lower()
+                utils.add_to_seen_coins(binance_coins, bittrex_coins, symbol)
+
+                seen_coins = utils.get_seen_coins()
+                if lowered_word not in seen_coins:
+                    utils.add_to_seen_coins(binance_coins, bittrex_coins, symbol)
+
                 finished = True
             if finished:
                 return True
@@ -38,5 +59,5 @@ def check_statuses(twitter, twitter_user):
 
 bought = False
 while not bought:
-    bought = check_statuses(twitter, twitter_user)
+    bought = check_statuses(twitter, twitter_user, seen_coins)
     time.sleep(4)
