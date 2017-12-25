@@ -72,7 +72,6 @@ def sell_at_peak(symbol):
     return
 
 
-
 bought_symbol = wait_for_tweet_and_buy()
 
 sell_at_peak(bought_symbol)
