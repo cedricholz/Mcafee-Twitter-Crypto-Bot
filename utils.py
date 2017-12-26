@@ -96,11 +96,13 @@ def get_date_time():
 
 
 def print_and_write_to_logfile(log_text):
+    timestamp = '[' + get_date_time() + '] '
+    log_text = timestamp + log_text
     if log_text is not None:
-        print(log_text + '\n')
+        print(log_text)
 
         with open('logs.txt', 'a') as myfile:
-            myfile.write(log_text + '\n\n')
+            myfile.write(log_text + '\n')
 
 
 def get_total_bittrex_bitcoin(bittrex):
@@ -179,7 +181,7 @@ def buy_from_bittrex(bittrex, market):
         my_open_orders = get_open_orders['result']
 
         if len(my_open_orders) == 0:
-            print_and_write_to_logfile("Successfully Bought " + market + " from Bittrex at " + get_date_time())
+            print_and_write_to_logfile("Successfully Bought " + str(amount) + " " + market + " on Bittrex")
             return 'Success'
         else:
             for order in my_open_orders:
@@ -220,5 +222,4 @@ def buy_from_binance(binance, market):
     order = binance.order_market_buy(
         symbol=market,
         quantity=amount)
-    print_and_write_to_logfile("Successfully Bought " + market + " from Binance at " + get_date_time())
-
+    print_and_write_to_logfile("Successfully Bought " + str(amount) + " " + market + " on Binance")
