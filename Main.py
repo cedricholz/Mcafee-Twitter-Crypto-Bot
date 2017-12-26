@@ -14,7 +14,7 @@ state['binance'] = False
 state['bittrex'] = False
 
 
-utils.print_and_write_to_logfile('STARTING APP...')
+utils.print_and_write_to_logfile('STARTING...')
 
 binance = utils.get_binance_account()
 bittrex = utils.get_bittrex_account()
@@ -69,7 +69,6 @@ def wait_for_tweet_and_buy():
         time.sleep(4)
     return symbol
 
-
 def get_price_bittrex(bittrex, symbol):
     market = 'BTC-' + symbol.upper()
     ticker = bittrex.get_ticker(market)
@@ -102,9 +101,7 @@ def sell_at_peak(state, symbol):
 
             if delta < SELL_THRESHOLD:
                 utils.print_and_write_to_logfile("THRESHOLD REACHED | SELLING ON BITTREX...")
-
-                # sell TODO
-
+                utils.sell_on_bittrex(bittrex, 'BTC-' + symbol.upper())
                 state['bittrex'] = False
 
         if state['binance']:
@@ -125,6 +122,7 @@ def sell_at_peak(state, symbol):
 
 # # # # #  MAIN  # # # # #
 utils.print_and_write_to_logfile('STARTING BUY PHASE')
-#bought_symbol = wait_for_tweet_and_buy() TODO uncomment buy
+bought_symbol = wait_for_tweet_and_buy()
 utils.print_and_write_to_logfile('STARTING SELL PHASE')
-sell_at_peak(state, 'REQ')
+sell_at_peak(state, bought_symbol)
+utils.print_and_write_to_logfile('TERMNINATING...')

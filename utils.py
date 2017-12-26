@@ -152,6 +152,35 @@ def get_bittrex_rate_amount(bittrex, market, total_bitcoin):
             return math.floor(amount_to_buy), order_rate
 
 
+def sell_on_bittrex(bittrex, market):
+    total_bitcoin = get_total_bittrex_bitcoin(bittrex)
+    sell_order = bittrex.sell_market(market, total_bitcoin)
+
+    while not sell_order['success']:
+        print_and_write_to_logfile("Buy Unsucessful")
+        time.sleep(4)
+        sell_order = bittrex.sell_market(market, total_bitcoin)
+
+    # Wait for order to go through
+    time.sleep(10)
+
+    get_open_orders = bittrex.get_open_orders(market)
+    while not get_open_orders['success']:
+        print_and_write_to_logfile("Get Open Orders Unsuccessful")
+        time.sleep(4)
+        get_open_orders = bittrex.get_open_orders(market)
+
+    my_open_orders = get_open_orders['result']
+
+    if len(my_open_orders) == 0:
+        print_and_write_to_logfile("SUCCESSFUL ORDER ON BITTREX")
+        print_and_write_to_logfile("MARKET: " + market)
+        print_and_write_to_logfile("AMOUNT: " + str(amount))
+        print_and_write_to_logfile("TOTAL: " + str(total_bitcoin))
+    else:
+        print_and_write_to_logfile("UNABLE TO BUY")
+
+
 def buy_from_bittrex(bittrex, market):
     total_bitcoin = get_total_bittrex_bitcoin(bittrex)
 
@@ -181,7 +210,10 @@ def buy_from_bittrex(bittrex, market):
         my_open_orders = get_open_orders['result']
 
         if len(my_open_orders) == 0:
-            print_and_write_to_logfile("Successfully Bought " + str(amount) + " " + market + " on Bittrex")
+            print_and_write_to_logfile("SUCCESSFUL ORDER ON BITTREX")
+            print_and_write_to_logfile("MARKET: " + market)
+            print_and_write_to_logfile("AMOUNT: " + str(amount))
+            print_and_write_to_logfile("TOTAL: " + str(total_bitcoin))
             return 'Success'
         else:
             for order in my_open_orders:
@@ -222,4 +254,7 @@ def buy_from_binance(binance, market):
     order = binance.order_market_buy(
         symbol=market,
         quantity=amount)
-    print_and_write_to_logfile("Successfully Bought " + str(amount) + " " + market + " on Binance")
+    print_and_write_to_logfile("SUCCESSFUL ORDER ON BINANCE")
+    print_and_write_to_logfile("MARKET: " + market)
+    print_and_write_to_logfile("AMOUNT: " + str(amount))
+    print_and_write_to_logfile("TOTAL: " + str(total_bitcoin))
