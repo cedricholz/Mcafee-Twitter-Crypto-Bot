@@ -9,3 +9,5 @@ binance_secrets.json
 twitter_secrets.json
 logs.txt
 __pycache__/
+images/
+ocr_secret.json

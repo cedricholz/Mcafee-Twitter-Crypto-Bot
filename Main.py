@@ -13,6 +13,7 @@ state = {}
 state['binance'] = False
 state['bittrex'] = False
 
+utils.reduce_file_size('image_to_ocr.jpg', 1000000)
 
 utils.print_and_write_to_logfile('STARTING...')
 
@@ -24,42 +25,48 @@ bittrex_coins = utils.bittrex_symbols_and_names_to_markets_and_names()
 
 twitter = utils.get_twitter_account()
 twitter_user = 'officialmcafee'
+
+ocr = utils.get_ocr_account()
+
 seen_coins = utils.get_seen_coins()
+
+twitter = utils.get_twitter_account()
 
 
 def check_statuses(twitter, twitter_user, seen_coins):
-    statuses = twitter.GetUserTimeline(screen_name=twitter_user)
-    coin_of_the_day_tweets = [s.text for s in statuses if "coin of the day" in s.text.lower()]
+
+
+    coin_of_the_day_tweet = utils.get_coin_of_the_day_tweet(twitter, ocr)
 
     finished = False
-    for tweet in coin_of_the_day_tweets:
-        for word in tweet.split(" "):
-            lowered_word = word.lower()
 
-            if lowered_word in binance_coins and lowered_word not in seen_coins:
-                utils.print_and_write_to_logfile("FOUND COIN: " + lowered_word)
-                market = binance_coins[lowered_word][0]
-                utils.buy_from_binance(binance, market)
-                symbol = market.split('BTC')[0].lower()
+    for word in coin_of_the_day_tweet.split(" "):
+        lowered_word = word.lower()
+
+        if lowered_word in binance_coins and lowered_word not in seen_coins:
+            utils.print_and_write_to_logfile("FOUND COIN: " + lowered_word)
+            market = binance_coins[lowered_word][0]
+            utils.buy_from_binance(binance, market)
+            symbol = market.split('BTC')[0].lower()
+            utils.add_to_seen_coins(binance_coins, bittrex_coins, symbol)
+            finished = True
+            state['binance'] = True
+
+        if lowered_word in bittrex_coins and lowered_word not in seen_coins:
+            utils.print_and_write_to_logfile("FOUND COIN: " + lowered_word)
+            market = bittrex_coins[lowered_word][0]
+            utils.buy_from_bittrex(bittrex, market)
+            symbol = market.split('-')[1].lower()
+            utils.add_to_seen_coins(binance_coins, bittrex_coins, symbol)
+            seen_coins = utils.get_seen_coins()
+            if lowered_word not in seen_coins:
                 utils.add_to_seen_coins(binance_coins, bittrex_coins, symbol)
-                finished = True
-                state['binance'] = True
+            finished = True
+            state['bittrex'] = True
 
-            if lowered_word in bittrex_coins and lowered_word not in seen_coins:
-                utils.print_and_write_to_logfile("FOUND COIN: " + lowered_word)
-                market = bittrex_coins[lowered_word][0]
-                utils.buy_from_bittrex(bittrex, market)
-                symbol = market.split('-')[1].lower()
-                utils.add_to_seen_coins(binance_coins, bittrex_coins, symbol)
-                seen_coins = utils.get_seen_coins()
-                if lowered_word not in seen_coins:
-                    utils.add_to_seen_coins(binance_coins, bittrex_coins, symbol)
-                finished = True
-                state['bittrex'] = True
-
-            if finished:
-                state['symbol'] = symbol
-                return True, symbol
+        if finished:
+            state['symbol'] = symbol
+            return True, symbol
     return False, ''
 
 def wait_for_tweet_and_buy():

@@ -8,20 +8,91 @@ import twitter
 from datetime import datetime
 import time
 import math
+import OCRSpace
+import tweepy
+from tweepy import OAuthHandler
+import re
+import os
+from PIL import Image
+import math
+
+def download_image(image_url, local_filename):
+     urllib.request.urlretrieve(image_url, local_filename)
+
+
+from resizeimage import resizeimage
+
+
+def reduce_file_size(filename, size_limit):
+    picture = Image.open(filename)
+    height_original = picture.height
+    width_original = picture.width
+
+
+    height_new = math.floor(math.sqrt(pow(2,18)*height_original/width_original))
+    width_new = math.floor(pow(2, 18)/height_new)
+
+    new_size = height_new*width_new
+
+    resized_image = picture.resize((height_new,width_new))
+
+    picture.save("image_to_ocr_scaled.jpg", quality=95)
+
+
+    print("Reducin")
+
+
+def get_image_text(ocr, image_url):
+    local_filename = 'image_to_ocr.jpg'
+    download_image(image_url, local_filename)
+
+    file_size = os.stat(local_filename).st_size
+
+    size_limit = 1000000
+    if file_size > size_limit:
+        reduce_file_size(filename, size_limit)
+
+    ocr_data = ocr.ocr_file(local_filename)['ParsedResults'][0]['TextOverlay']['Lines']
+
+    picture_text = ""
+    for line in ocr_data:
+        for word in line['Words']:
+            picture_text += re.sub(r'\W+', '', word['WordText'])  + " "
+
+    return picture_text
+
+def get_coin_of_the_day_tweet(twitter, ocr):
+    tweets = twitter.user_timeline(screen_name='officialmcafee',
+                                   count=200, include_rts=False,
+                                   exclude_replies=True)
+
+    for status in tweets:
+        tweet_text = status._json['text']
+
+        media = status.entities.get('media', [])
+        if len(media) > 0:
+            image_link = media[0]['media_url']
+            tweet_text += tweet_text + ' ' + get_image_text(ocr, image_link)
+        lowered_tweet = tweet_text.lower()
+        if 'coin of the day' in lowered_tweet:
+            return lowered_tweet
+
+    return coin_of_the_day_tweets
+
 
 
 def query_url(url_addr):
     with urllib.request.urlopen(url_addr) as url:
         return json.loads(url.read().decode())
 
+
 def get_seen_coins():
     with open('seen_coins.txt', 'r') as f:
         seen_coins = json.loads(f.read())
     return seen_coins
 
+
 def add_to_seen_coins(binance_coins, bittrex_coins, symbol):
-
-
     seen_coins = get_seen_coins()
 
     full_name = ''
@@ -29,7 +100,6 @@ def add_to_seen_coins(binance_coins, bittrex_coins, symbol):
         full_name = binance_coins[symbol][1]
     elif symbol in bittrex_coins:
         full_name = bittrex_coins[symbol][1]
-
 
     seen_coins.append(full_name)
     seen_coins.append(symbol)
@@ -84,10 +154,23 @@ def get_twitter_account():
         secrets = json.load(secrets_file)
         secrets_file.close()
 
-    return twitter.Api(secrets['consumer_key'],
-                       secrets['consumer_secret'],
-                       secrets['access_token_key'],
-                       secrets['access_token_secret'])
+    consumer_key = secrets['consumer_key']
+    consumer_secret = secrets['consumer_secret']
+    access_token = secrets['access_token_key']
+    access_secret = secrets['access_token_secret']
+
+    auth = OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token(access_token, access_secret)
+
+    return tweepy.API(auth)
+
+
+def get_ocr_account():
+    with open("ocr_secret.json") as secret_file:
+        secret = json.load(secret_file)
+        secret_file.close()
+    key = secret['api_key']
+    return OCRSpace.OCRSpace(secret['api_key'])
 
 
 def get_date_time():
@@ -191,7 +274,6 @@ def buy_from_bittrex(bittrex, market):
         # Attempt to make buy order
         buy_order = bittrex.buy_limit(market, amount_to_buy, rate)
 
-
         while not buy_order['success']:
             print_and_write_to_logfile("Buy Unsucessful")
             time.sleep(4)
@@ -225,6 +307,7 @@ def buy_from_bittrex(bittrex, market):
                     canceled = bittrex.cancel(order['OrderUuid'])
             # Wait for sell to go through
             time.sleep(10)
+
 
 def get_binance_amount(binance, market, total_bitcoin):
     trades = binance.get_recent_trades(symbol=market)
