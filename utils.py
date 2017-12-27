@@ -23,23 +23,18 @@ def download_image(image_url, local_filename):
 from resizeimage import resizeimage
 
 
-def reduce_file_size(filename, size_limit):
+def reduce_file_size(filename, max_size):
     picture = Image.open(filename)
     height_original = picture.height
     width_original = picture.width
 
-
-    height_new = math.floor(math.sqrt(pow(2,18)*height_original/width_original))
-    width_new = math.floor(pow(2, 18)/height_new)
+    height_new = math.floor(math.sqrt(max_size*height_original/width_original))
+    width_new = math.floor(max_size/height_new)
 
     new_size = height_new*width_new
-
-    resized_image = picture.resize((height_new,width_new))
-
-    picture.save("image_to_ocr_scaled.jpg", quality=95)
-
-
-    print("Reducin")
+    resized_image = picture.resize((width_new, height_new), Image.ANTIALIAS)
+    resized_image.save("image_to_ocr_scaled.jpg", quality=95)
+    print("Reducing file size to: " + str(width_new) + " x " + str(height_new))
 
 
 def get_image_text(ocr, image_url):

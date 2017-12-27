@@ -13,7 +13,7 @@ state = {}
 state['binance'] = False
 state['bittrex'] = False
 
-utils.reduce_file_size('image_to_ocr.jpg', 1000000)
+utils.reduce_file_size('image_to_ocr.jpg', pow(2, 17))
 
 utils.print_and_write_to_logfile('STARTING...')
 
