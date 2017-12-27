@@ -260,8 +260,8 @@ def sell_on_bittrex(bittrex, market):
         if len(my_open_orders) == 0:
             print_and_write_to_logfile("SUCCESSFUL ORDER ON BITTREX")
             print_and_write_to_logfile("MARKET: " + market)
-            print_and_write_to_logfile("AMOUNT: " + str(amount))
-            print_and_write_to_logfile("TOTAL: " + str(total_bitcoin))
+            print_and_write_to_logfile("AMOUNT: " + str(amount_to_sell))
+            print_and_write_to_logfile("RATE: " + str(rate))
             return 'Success'
         else:
             print_and_write_to_logfile("UNABLE TO SELL AT THIS PRICE")
