@@ -43,7 +43,7 @@ def get_image_text(ocr, image_url):
 
     file_size = os.stat(local_filename).st_size
 
-    size_limit = 1000000
+    size_limit = 1048576
     if file_size > size_limit:
         reduce_file_size(filename, pow(2, 17))
 
