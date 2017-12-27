@@ -34,9 +34,7 @@ twitter = utils.get_twitter_account()
 
 def check_statuses(twitter, twitter_user, seen_coins):
 
-
     coin_of_the_day_tweet = utils.get_coin_of_the_day_tweet(twitter, ocr)
-
     finished = False
 
     for word in coin_of_the_day_tweet.split(" "):
