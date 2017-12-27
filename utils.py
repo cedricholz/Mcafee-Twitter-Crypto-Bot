@@ -23,13 +23,14 @@ def download_image(image_url, local_filename):
 from resizeimage import resizeimage
 
 
-def reduce_file_size(filename, max_size):
+def reduce_file_size(filename, size_limit):
+    size_limit = size_limit / 4
     picture = Image.open(filename)
     height_original = picture.height
     width_original = picture.width
 
-    height_new = math.floor(math.sqrt(max_size*height_original/width_original))
-    width_new = math.floor(max_size/height_new)
+    height_new = math.floor(math.sqrt(size_limit*height_original/width_original))
+    width_new = math.floor(size_limit/height_new)
 
     new_size = height_new*width_new
     resized_image = picture.resize((width_new, height_new), Image.ANTIALIAS)
