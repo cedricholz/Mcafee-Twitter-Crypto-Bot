@@ -70,7 +70,7 @@ def get_coin_of_the_day_tweet(twitter, ocr):
             image_link = media[0]['media_url']
             tweet_text += tweet_text + ' ' + get_image_text(ocr, image_link)
         lowered_tweet = tweet_text.lower()
-        if 'coin of the day' in lowered_tweet:
+        if 'coin of the' in lowered_tweet:
             return lowered_tweet
 
     return coin_of_the_day_tweets
