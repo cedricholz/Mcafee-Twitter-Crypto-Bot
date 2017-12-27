@@ -22,6 +22,7 @@ bittrex = utils.get_bittrex_account()
 binance_coins = utils.binance_symbols_and_names_to_markets_and_names(binance)
 bittrex_coins = utils.bittrex_symbols_and_names_to_markets_and_names()
 
+
 twitter = utils.get_twitter_account()
 twitter_user = 'officialmcafee'
 

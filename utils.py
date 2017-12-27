@@ -230,34 +230,50 @@ def get_bittrex_rate_amount(bittrex, market, total_bitcoin):
         if amount_to_buy < order_quantity:
             return math.floor(amount_to_buy), order_rate
 
+def get_bittrex_amount_to_sell_and_price(bittrex, market):
+    amount_to_sell = float(bittrex.get_balance(market.split('-')[1])['result']['Balance'])
+    rate = float(bittrex.get_ticker(market)['result']['Ask'])
+    return amount_to_sell, rate
 
 def sell_on_bittrex(bittrex, market):
-    total_bitcoin = get_total_bittrex_bitcoin(bittrex)
-    sell_order = bittrex.sell_market(market, total_bitcoin)
+    while True:
+        amount_to_sell, rate = get_bittrex_amount_to_sell_and_price(bittrex, market)
 
-    while not sell_order['success']:
-        print_and_write_to_logfile("Buy Unsucessful")
-        time.sleep(4)
-        sell_order = bittrex.sell_market(market, total_bitcoin)
+        sell_order = bittrex.sell_limit(market, amount_to_sell, rate)
 
-    # Wait for order to go through
-    time.sleep(10)
+        while not sell_order['success']:
+            print_and_write_to_logfile("Buy Unsucessful")
+            time.sleep(4)
+            sell_order = bittrex.sell_market(market, amount_to_buy, rate)
 
-    get_open_orders = bittrex.get_open_orders(market)
-    while not get_open_orders['success']:
-        print_and_write_to_logfile("Get Open Orders Unsuccessful")
-        time.sleep(4)
+        # Wait for order to go through
+        time.sleep(10)
+
         get_open_orders = bittrex.get_open_orders(market)
+        while not get_open_orders['success']:
+            print_and_write_to_logfile("Get Open Orders Unsuccessful")
+            time.sleep(4)
+            get_open_orders = bittrex.get_open_orders(market)
 
-    my_open_orders = get_open_orders['result']
+        my_open_orders = get_open_orders['result']
 
-    if len(my_open_orders) == 0:
-        print_and_write_to_logfile("SUCCESSFUL ORDER ON BITTREX")
-        print_and_write_to_logfile("MARKET: " + market)
-        print_and_write_to_logfile("AMOUNT: " + str(amount))
-        print_and_write_to_logfile("TOTAL: " + str(total_bitcoin))
-    else:
-        print_and_write_to_logfile("UNABLE TO BUY")
+        if len(my_open_orders) == 0:
+            print_and_write_to_logfile("SUCCESSFUL ORDER ON BITTREX")
+            print_and_write_to_logfile("MARKET: " + market)
+            print_and_write_to_logfile("AMOUNT: " + str(amount))
+            print_and_write_to_logfile("TOTAL: " + str(total_bitcoin))
+            return 'Success'
+        else:
+            print_and_write_to_logfile("UNABLE TO SELL AT THIS PRICE")
+            for order in my_open_orders:
+                print_and_write_to_logfile("Canceling " + order['OrderUuid'])
+                canceled = bittrex.cancel(order['OrderUuid'])
+                while not canceled['success']:
+                    print_and_write_to_logfile("Cancel unsuccessful")
+                    time.sleep(4)
+                    canceled = bittrex.cancel(order['OrderUuid'])
+            # Wait for sell to go through
+            time.sleep(10)
 
 
 def buy_from_bittrex(bittrex, market):
@@ -290,7 +306,7 @@ def buy_from_bittrex(bittrex, market):
         if len(my_open_orders) == 0:
             print_and_write_to_logfile("SUCCESSFUL ORDER ON BITTREX")
             print_and_write_to_logfile("MARKET: " + market)
-            print_and_write_to_logfile("AMOUNT: " + str(amount))
+            print_and_write_to_logfile("AMOUNT: " + str(amount_to_buy))
             print_and_write_to_logfile("TOTAL: " + str(total_bitcoin))
             return 'Success'
         else:
@@ -301,7 +317,7 @@ def buy_from_bittrex(bittrex, market):
                     print_and_write_to_logfile("Cancel unsuccessful")
                     time.sleep(4)
                     canceled = bittrex.cancel(order['OrderUuid'])
-            # Wait for sell to go through
+            # Wait for cancel to go through
             time.sleep(10)
 
 
