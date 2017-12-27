@@ -12,8 +12,8 @@ Create a file in the main folder called bittrex_secrets.json and fill it with yo
 
 ```
 {
-  "key": "mykey",
-  "secret": "mysecret"
+  "key": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "secret": "xxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 }
 ```
 
@@ -23,8 +23,8 @@ Create a file in the main folder called binance_secrets.json and fill it with yo
 
 ```
 {
-  "key": "mykey",
-  "secret": "mysecret"
+  "key": "xxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "secret": "xxxxxxxxxxxxxxxxxxxxxxxx"
 }
 ```
 
@@ -38,6 +38,16 @@ Create a file in the main folder called twitter_secrets.json and fill it with yo
   "access_token_key": "xxxxxxxx-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
   "access_token_secret": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 }
+```
+
+Get an API key from https://ocr.space/ocrapi and put it in a file in the main folder called ocr_secret.json in the format below.
+
+
+```
+{
+  "api_key": "xxxxxxxxxxxxxxxxxxxx"
+}
+
 ```
 Then just make sure you have Bitcoin in both of your accounts, turn it on at night.
 Make sure the seen_coins.txt list is updated before you start or else it might buy a coin that's already been pumped.
