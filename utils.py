@@ -321,14 +321,29 @@ def buy_from_bittrex(bittrex, market):
             time.sleep(10)
 
 
-def get_binance_amount(binance, market, total_bitcoin):
+def get_binance_amount_to_buy(binance, market, total_bitcoin):
+    tickers = binance.get_exchange_info()['symbols']
+
+    ticker = [ticker for ticker in tickers if ticker['symbol'] == market][0]
+
+    constraints = ticker['filters'][1]
+
+    minQty = float(constraints['minQty'])
+    maxQty = float(constraints['maxQty'])
+    stepSize = float(constraints['stepSize'])
+
     trades = binance.get_recent_trades(symbol=market)
     for trade in trades:
         order_rate = float(trade['price'])
         order_quantity = float(trade['qty'])
+
         amount_to_buy = total_bitcoin / order_rate
+
+        constrained_amount_to_buy = math.floor((1 / stepSize) * amount_to_buy) * stepSize
         if amount_to_buy < order_quantity:
-            return math.floor(amount_to_buy)
+            if constrained_amount_to_buy < minQty or constrained_amount_to_buy > maxQty:
+                return 0
+            return amount_to_buy
 
 
 def get_total_binance_bitcoin(binance):
@@ -344,7 +359,7 @@ def get_total_binance_bitcoin(binance):
 def buy_from_binance(binance, market):
     total_bitcoin = get_total_binance_bitcoin(binance)
 
-    amount = get_binance_amount(binance, market, total_bitcoin)
+    amount = get_binance_amount_to_buy(binance, market, total_bitcoin)
 
     order = binance.order_market_buy(
         symbol=market,
@@ -356,7 +371,7 @@ def buy_from_binance(binance, market):
 
 
 
-def get_amount_to_sell(binance, symbol, market):
+def get_binance_amount_to_sell(binance, symbol, market):
 
     tickers = binance.get_exchange_info()['symbols']
 
@@ -383,9 +398,7 @@ def sell_on_binance(binance, symbol):
     symbol = symbol.upper()
     market = symbol + 'BTC'
 
-    amount = get_amount_to_sell(binance, symbol, market)
-
-
+    amount = get_binance_amount_to_sell(binance, symbol, market)
 
     if amount > 0:
         order = binance.order_market_sell(

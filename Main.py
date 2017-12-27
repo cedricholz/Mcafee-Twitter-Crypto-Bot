@@ -19,6 +19,7 @@ utils.print_and_write_to_logfile('STARTING...')
 binance = utils.get_binance_account()
 bittrex = utils.get_bittrex_account()
 
+x = utils.buy_from_binance(binance, "ARKBTC")
 
 binance_coins = utils.binance_symbols_and_names_to_markets_and_names(binance)
 bittrex_coins = utils.bittrex_symbols_and_names_to_markets_and_names()
