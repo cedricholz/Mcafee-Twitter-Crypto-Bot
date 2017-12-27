@@ -44,9 +44,9 @@ def get_image_text(ocr, image_url):
 
     file_size = os.stat(local_filename).st_size
 
-    size_limit = pow(2, 17)
+    size_limit = 1000000
     if file_size > size_limit:
-        reduce_file_size(filename, size_limit)
+        reduce_file_size(filename, pow(2, 17))
 
     ocr_data = ocr.ocr_file(local_filename)['ParsedResults'][0]['TextOverlay']['Lines']
 
