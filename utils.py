@@ -353,3 +353,48 @@ def buy_from_binance(binance, market):
     print_and_write_to_logfile("MARKET: " + market)
     print_and_write_to_logfile("AMOUNT: " + str(amount))
     print_and_write_to_logfile("TOTAL: " + str(total_bitcoin))
+
+
+
+def get_amount_to_sell(binance, symbol, market):
+
+    tickers = binance.get_exchange_info()['symbols']
+
+    ticker = [ticker for ticker in tickers if ticker['symbol'] == market][0]
+
+    constraints = ticker['filters'][1]
+
+    minQty = float(constraints['minQty'])
+    maxQty = float(constraints['maxQty'])
+    stepSize = float(constraints['stepSize'])
+
+    accounts = binance.get_account()['balances']
+    for coin in accounts:
+        if coin['asset'] == symbol:
+            amount_held =  float(coin['free'])
+            amount_to_sell = math.floor((1 / stepSize) * amount_held) * stepSize
+            if amount_to_sell < minQty or amount_to_sell > maxQty:
+                return 0
+            else:
+                return amount_to_sell
+    return 0
+
+def sell_on_binance(binance, symbol):
+    symbol = symbol.upper()
+    market = symbol + 'BTC'
+
+    amount = get_amount_to_sell(binance, symbol, market)
+
+
+
+    if amount > 0:
+        order = binance.order_market_sell(
+            symbol=market,
+            quantity=amount)
+
+        print_and_write_to_logfile("SELL ORDER ON BINANCE SUCCESSFUL")
+        print_and_write_to_logfile("MARKET: " + symbol)
+        print_and_write_to_logfile("AMOUNT" + str(amount))
+
+    else:
+        print_and_write_to_logfile("NOT ENOUGH COIN TO MAKE SELL ORDER")

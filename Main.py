@@ -19,6 +19,7 @@ utils.print_and_write_to_logfile('STARTING...')
 binance = utils.get_binance_account()
 bittrex = utils.get_bittrex_account()
 
+
 binance_coins = utils.binance_symbols_and_names_to_markets_and_names(binance)
 bittrex_coins = utils.bittrex_symbols_and_names_to_markets_and_names()
 
@@ -121,7 +122,7 @@ def sell_at_peak(state, symbol):
             if delta < SELL_THRESHOLD:
                 utils.print_and_write_to_logfile("THRESHOLD REACHED | SELLING ON BINANCE...")
 
-                # sell TODO
+                utils.sell_on_binance(binance, symbol + 'BTC')
 
                 state['bittrex'] = False
 
