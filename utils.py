@@ -33,8 +33,8 @@ def reduce_file_size(filename, max_size):
 
     new_size = height_new*width_new
     resized_image = picture.resize((width_new, height_new), Image.ANTIALIAS)
-    resized_image.save("image_to_ocr_scaled.jpg", quality=95)
-    print("Reducing file size to: " + str(width_new) + " x " + str(height_new))
+    resized_image.save("image_to_ocr_scaled.jpg", quality=100)
+    print_and_write_to_logfile("Reducing file size to: " + str(width_new) + " x " + str(height_new))
 
 
 def get_image_text(ocr, image_url):
@@ -43,7 +43,7 @@ def get_image_text(ocr, image_url):
 
     file_size = os.stat(local_filename).st_size
 
-    size_limit = 1000000
+    size_limit = pow(2, 17)
     if file_size > size_limit:
         reduce_file_size(filename, size_limit)
 
