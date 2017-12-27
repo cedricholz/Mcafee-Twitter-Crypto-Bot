@@ -2,7 +2,7 @@
 
 John McAfee has decided to tweet about a coin everyday for 50 days. So far every coin that he was tweeted about has jumped over 100% within the first few minutes of his tweet. This bot is built to take advantage of that.
 
-The bot waits for John to tweet, parses the tweet for the coin name, and checks to see if the coin is listed on either Binance or Bittrex. If it is on one of them, the bot uses all the Bitcoin in the account to buy the coin.
+The bot waits for John to tweet, parses the tweet and uses OCR on any images to get the full text of the tweet and searches for the coin name. It then checks to see if the coin is listed on either Binance or Bittrex. If it is on one of them, the bot uses all the Bitcoin in the account to buy the coin.
 
 # Instructions for use
 
