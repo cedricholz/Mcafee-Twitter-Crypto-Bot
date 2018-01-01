@@ -73,7 +73,7 @@ def get_coin_of_the_day_tweet(twitter, ocr):
         if 'coin of the' in lowered_tweet:
             return lowered_tweet
 
-    return coin_of_the_day_tweets
+    return ''
 
 
 
