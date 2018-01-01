@@ -3,6 +3,7 @@ import time
 import math
 import threading
 from threading import Thread
+import traceback
 
 # CONSTANTS # # # # # # # #
 SELL_THRESHOLD = -0.08    # % drop/gain in the timespan of CHECK_TIMER
@@ -70,7 +71,10 @@ def check_statuses(twitter, twitter_user, seen_coins):
 def wait_for_tweet_and_buy():
     bought = False
     while not bought:
-        bought, symbol = check_statuses(twitter, twitter_user, seen_coins)
+        try:
+            bought, symbol = check_statuses(twitter, twitter_user, seen_coins)
+        except:
+            utils.print_and_write_to_logfile(traceback.format_exc())
         time.sleep(4)
     return symbol
 
